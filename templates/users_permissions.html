@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Manage Account{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>{{ user.full_name }}</h2><p class="mono">@{{ user.username }}</p></div></div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Role &amp; Restrictions</h3>
+    <form method="post">
+      <label>Role</label>
+      <select name="role" id="role" onchange="toggleAdmin()">
+        <option value="user" {{ 'selected' if user.role=='user' }}>User (restricted)</option>
+        <option value="admin" {{ 'selected' if user.role=='admin' }}>Admin (full access)</option>
+      </select>
+
+      <div id="permBlock">
+        <label>Access Permissions</label>
+        <div class="checkline"><input type="checkbox" name="can_manage_inventory" id="p1" {{ 'checked' if user.can_manage_inventory }}><label for="p1">Manage Inventory (add / edit stock)</label></div>
+        <div class="checkline"><input type="checkbox" name="can_manage_sales" id="p2" {{ 'checked' if user.can_manage_sales }}><label for="p2">Process Sales (point of sale)</label></div>
+        <div class="checkline"><input type="checkbox" name="can_view_reports" id="p3" {{ 'checked' if user.can_view_reports }}><label for="p3">View Purchase History / Reports</label></div>
+        <div class="checkline"><input type="checkbox" name="can_manage_purchasing" id="p4" {{ 'checked' if user.can_manage_purchasing }}><label for="p4">Manage Suppliers &amp; Purchase Orders</label></div>
+      </div>
+
+      <div class="checkline" style="margin-top:14px;">
+        <input type="checkbox" name="is_active" id="active" {{ 'checked' if user.is_active }}>
+        <label for="active">Account is active (uncheck to block login)</label>
+      </div>
+
+      <button class="btn btn-primary" type="submit">Save Changes</button>
+      <a class="btn" href="{{ url_for('users_list') }}">Back</a>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3>Reset Password</h3>
+    <form method="post" action="{{ url_for('users_reset_password', user_id=user.id) }}">
+      <label>New Password</label>
+      <input type="password" name="new_password" required>
+      <button class="btn" type="submit">Reset Password</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleAdmin() {
+  const isAdmin = document.getElementById('role').value === 'admin';
+  document.getElementById('permBlock').style.display = isAdmin ? 'none' : 'block';
+}
+toggleAdmin();
+</script>
+{% endblock %}

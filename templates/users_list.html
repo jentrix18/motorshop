@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Accounts{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h2>Accounts &amp; Access</h2><p>Create admin/user accounts and control what each one can access.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('users_add') }}">+ New Account</a>
+</div>
+
+<div class="card">
+  <table>
+    <tr><th>Name</th><th>Username</th><th>Role</th><th>Access</th><th>Status</th><th></th></tr>
+    {% for u in users %}
+    <tr>
+      <td>{{ u.full_name }}</td>
+      <td class="mono">{{ u.username }}</td>
+      <td><span class="badge {{ 'badge-admin' if u.role=='admin' else 'badge-user' }}">{{ u.role }}</span></td>
+      <td>
+        {% if u.role == 'admin' %}
+          Full access
+        {% else %}
+          {{ 'Inventory ' if u.can_manage_inventory }}{{ 'Sales ' if u.can_manage_sales }}{{ 'Reports ' if u.can_view_reports }}
+          {%- if not (u.can_manage_inventory or u.can_manage_sales or u.can_view_reports) %}None{% endif %}
+        {% endif %}
+      </td>
+      <td>
+        {% if u.is_active %}<span style="color:var(--good);">Active</span>{% else %}<span class="badge badge-inactive">Deactivated</span>{% endif %}
+      </td>
+      <td><a class="btn btn-sm" href="{{ url_for('users_permissions', user_id=u.id) }}">Manage</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}

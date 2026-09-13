@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Restore Database{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Restore Database</h2><p>Replace the current database with a previously downloaded backup file.</p></div></div>
+
+<div class="flash flash-error" style="margin-bottom:20px;">
+  <strong>⚠️ This will replace ALL current data</strong> — every item, sale, user account,
+  and record will be overwritten with whatever is inside the backup file you upload.
+  This cannot be undone from within the app (though a safety copy of your current
+  database is saved automatically to the app folder before restoring).
+</div>
+
+<div class="card" style="max-width:480px;">
+  <form method="post" enctype="multipart/form-data">
+    <label>Backup File (.db)</label>
+    <input type="file" name="backup_file" accept=".db" required>
+    <button class="btn btn-danger" type="submit"
+            onclick="return confirm('Are you absolutely sure? This will replace all current data with the uploaded backup.')">
+      Restore This Backup
+    </button>
+    <a class="btn" href="{{ url_for('dashboard') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

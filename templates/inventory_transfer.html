@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Transfer Stock{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Transfer Stock to Another Branch</h2><p>Select items and quantities to send. This deducts from your local stock and generates a file to give to the receiving branch — email, USB, Viber, whatever's easiest.</p></div></div>
+
+<form method="post">
+  <div class="card" style="margin-bottom:16px; max-width:420px;">
+    <label>Destination Branch</label>
+    <input type="text" name="destination_branch" required placeholder="e.g. San Pedro, Cabuyao, Los Baños">
+  </div>
+
+  <div class="card">
+    <h3>Items to Transfer</h3>
+    {% if items %}
+    <table id="transferTable">
+      <tr><th>Item</th><th style="width:120px;">Qty to Send</th><th></th></tr>
+    </table>
+    <button type="button" class="btn btn-sm" onclick="addRow()">+ Add Item</button>
+    <button class="btn btn-primary" type="submit" style="margin-top:14px; display:block;">Transfer &amp; Download File</button>
+    {% else %}
+    <div class="empty">No stock available to transfer.</div>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+const ITEMS = [
+  {% for i in items %}
+  {id: {{ i.id }}, name: {{ (i.item_name + (' — ' + i.size if i.size else ''))|tojson }}, stock: {{ i.quantity }}},
+  {% endfor %}
+];
+
+function addRow() {
+  const table = document.getElementById('transferTable');
+  const tr = document.createElement('tr');
+  const options = ITEMS.map(it => `<option value="${it.id}" data-stock="${it.stock}">${it.name} (${it.stock} in stock)</option>`).join('');
+  tr.innerHTML = `
+    <td><select name="item_id[]" style="margin-bottom:0;">${options}</select></td>
+    <td><input type="number" name="quantity[]" min="1" value="1" style="margin-bottom:0;"></td>
+    <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove();">✕</button></td>
+  `;
+  table.appendChild(tr);
+}
+if (ITEMS.length) addRow();
+</script>
+{% endblock %}

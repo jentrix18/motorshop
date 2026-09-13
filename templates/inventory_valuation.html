@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Inventory Valuation{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Inventory Valuation</h2><p>What your current stock is worth, at cost and at retail. Visible to admins only.</p></div></div>
+
+<div class="grid grid-4" style="margin-bottom:24px;">
+  <div class="stat">
+    <div class="label">Total Cost Value</div>
+    <div class="value">₱{{ '%.2f'|format(total_cost_value) }}</div>
+    <div class="sub">What you paid for everything in stock</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total Retail Value</div>
+    <div class="value">₱{{ '%.2f'|format(total_retail_value) }}</div>
+    <div class="sub">What it's worth if all sold at listed price</div>
+  </div>
+  <div class="stat" style="border-left-color: var(--good);">
+    <div class="label">Potential Profit</div>
+    <div class="value">₱{{ '%.2f'|format(total_potential_profit) }}</div>
+    <div class="sub">If everything currently in stock sells</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>Per-Item Breakdown</h3>
+  {% if rows %}
+  <table>
+    <tr><th>Item</th><th>Qty</th><th>Cost Price</th><th>Cost Value</th><th>Selling Price</th><th>Retail Value</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.item_name }}{{ ' — ' + r.size if r.size }}</td>
+      <td>{{ r.quantity }} {{ r.unit }}</td>
+      <td>₱{{ '%.2f'|format(r.cost_price) }}</td>
+      <td>₱{{ '%.2f'|format(r.cost_value) }}</td>
+      <td>₱{{ '%.2f'|format(r.selling_price) }}</td>
+      <td>₱{{ '%.2f'|format(r.retail_value) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No items in inventory.</div>
+  {% endif %}
+</div>
+{% endblock %}

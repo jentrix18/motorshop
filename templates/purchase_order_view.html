@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{{ po.po_number }}{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h2>{{ po.po_number }}</h2><p>{{ po.supplier_name }}{{ ' · ' + po.contact_person if po.contact_person }}{{ ' · ' + po.phone if po.phone }}</p></div>
+  <a class="btn" href="{{ url_for('purchase_orders_list') }}">← All Purchase Orders</a>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:24px;">
+  <div class="stat">
+    <div class="label">Status</div>
+    <div class="value" style="font-size:20px; text-transform:capitalize;">{{ po.status }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Order Date</div>
+    <div class="value" style="font-size:20px;">{{ po.order_date }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Total Cost</div>
+    <div class="value">₱{{ '%.2f'|format(po.total_cost) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Received Date</div>
+    <div class="value" style="font-size:20px;">{{ po.received_date[:10] if po.received_date else '—' }}</div>
+  </div>
+</div>
+
+{% if po.notes %}
+<div class="card" style="margin-bottom:20px;"><strong>Notes:</strong> {{ po.notes }}</div>
+{% endif %}
+
+<div class="card">
+  <h3>Items</h3>
+  {% if po.status in ['pending', 'partial'] %}
+  <form method="post" action="{{ url_for('purchase_orders_receive', po_id=po.id) }}">
+    <table>
+      <tr><th>Item</th><th>Ordered</th><th>Received So Far</th><th>Remaining</th><th style="width:140px;">Receive Now</th></tr>
+      {% for l in line_items %}
+      <tr>
+        <td>{{ l.item_name }}</td>
+        <td>{{ l.quantity_ordered }}</td>
+        <td>{{ l.quantity_received }}</td>
+        <td>{{ l.quantity_ordered - l.quantity_received }}</td>
+        <td>
+          {% if l.quantity_received < l.quantity_ordered %}
+          <input type="number" name="receive_{{ l.id }}" min="0" max="{{ l.quantity_ordered - l.quantity_received }}" value="{{ l.quantity_ordered - l.quantity_received }}" style="margin-bottom:0;">
+          {% else %}
+          <span style="color:var(--good);">✓ Complete</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+    <button class="btn btn-primary" type="submit" style="margin-top:14px;">Confirm Stock Received</button>
+  </form>
+  {% if po.status == 'pending' %}
+  <form method="post" action="{{ url_for('purchase_orders_cancel', po_id=po.id) }}" style="margin-top:10px;"
+        onsubmit="return confirm('Cancel {{ po.po_number }}? This cannot be undone.')">
+    <button type="submit" class="btn btn-sm btn-danger">Cancel This Order</button>
+  </form>
+  {% endif %}
+  {% else %}
+  <table>
+    <tr><th>Item</th><th>Ordered</th><th>Received</th><th>Unit Cost</th><th>Line Total</th></tr>
+    {% for l in line_items %}
+    <tr>
+      <td>{{ l.item_name }}</td>
+      <td>{{ l.quantity_ordered }}</td>
+      <td>{{ l.quantity_received }}</td>
+      <td>₱{{ '%.2f'|format(l.unit_cost) }}</td>
+      <td>₱{{ '%.2f'|format(l.line_total) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

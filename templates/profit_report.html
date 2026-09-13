@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block title %}Profit Report{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Profit Report</h2><p>Gross sales, cost of goods, and profit margin. Visible to admins only.</p></div></div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Specific Date</label>
+    <input type="date" name="date" value="{{ date_filter }}">
+  </div>
+  <div class="field">
+    <label>Month</label>
+    <input type="month" name="month" value="{{ month_filter }}">
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn" href="{{ url_for('profit_report') }}">Reset (All Time)</a>
+</form>
+
+<div class="grid grid-4" style="margin-bottom:24px;">
+  <div class="stat">
+    <div class="label">Gross Sales</div>
+    <div class="value">₱{{ '%.2f'|format(totals.gross_sales) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Discounts Given</div>
+    <div class="value">₱{{ '%.2f'|format(totals.discounts) }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Net Sales</div>
+    <div class="value">₱{{ '%.2f'|format(totals.net_sales) }}</div>
+  </div>
+  <div class="stat" style="border-left-color: var(--good);">
+    <div class="label">Gross Profit</div>
+    <div class="value">₱{{ '%.2f'|format(totals.gross_profit) }}</div>
+    <div class="sub">{{ '%.1f'|format(margin) }}% margin</div>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:24px;">
+  <h3>Cost of Goods Sold</h3>
+  <p style="color:var(--muted); margin-top:-8px;">Total cost of items sold in this period: <strong style="color:var(--text);">₱{{ '%.2f'|format(totals.cogs) }}</strong></p>
+</div>
+
+<div class="card">
+  <h3>Per-Sale Breakdown</h3>
+  {% if sales %}
+  <table>
+    <tr><th>Receipt</th><th>Date</th><th>Buyer</th><th>Net Sale</th><th>COGS</th><th>Profit</th></tr>
+    {% for s in sales %}
+    <tr>
+      <td class="mono">{{ s.receipt_no }}</td>
+      <td>{{ s.sale_date }}</td>
+      <td>{{ s.buyer_name }}</td>
+      <td>₱{{ '%.2f'|format(s.total) }}</td>
+      <td>₱{{ '%.2f'|format(s.cogs) }}</td>
+      <td style="color: {{ 'var(--good)' if s.gross_profit >= 0 else 'var(--bad)' }};">₱{{ '%.2f'|format(s.gross_profit) }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No sales in this period.</div>
+  {% endif %}
+</div>
+{% endblock %}

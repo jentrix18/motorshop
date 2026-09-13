@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Export Sales{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Export Sales</h2><p>Download this branch's sales for a date range, to send to Main for accumulation.</p></div></div>
+
+<div class="card" style="max-width:420px;">
+  <form method="post">
+    <div class="form-row">
+      <div>
+        <label>From Date</label>
+        <input type="date" name="date_from" required>
+      </div>
+      <div>
+        <label>To Date</label>
+        <input type="date" name="date_to" required>
+      </div>
+    </div>
+    <button class="btn btn-primary" type="submit">Export &amp; Download</button>
+  </form>
+</div>
+{% endblock %}

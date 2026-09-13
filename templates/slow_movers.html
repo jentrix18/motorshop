@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Slow Movers{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Slow-Moving Products</h2><p>Items with the least sales activity — candidates for a discount push or reordering less.</p></div></div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Lookback Period</label>
+    <select name="days">
+      <option value="30" {{ 'selected' if days==30 }}>Last 30 days</option>
+      <option value="60" {{ 'selected' if days==60 }}>Last 60 days</option>
+      <option value="90" {{ 'selected' if days==90 }}>Last 90 days</option>
+      <option value="180" {{ 'selected' if days==180 }}>Last 180 days</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+</form>
+
+<div class="card">
+  {% if rows %}
+  <table>
+    <tr><th>Item</th><th>SKU</th><th>Size / Version</th><th>Current Stock</th><th>Sold in Period</th><th>Last Sold</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ r.item_name }}</td>
+      <td class="mono">{{ r.sku }}</td>
+      <td>{{ r.size or '' }}{{ ' · ' if r.size and r.version }}{{ r.version or '' }}{{ '—' if not r.size and not r.version }}</td>
+      <td>{{ r.current_stock }}</td>
+      <td class="{{ 'low-stock' if r.qty_sold_period == 0 }}">{{ r.qty_sold_period }}</td>
+      <td>{{ r.last_sold_date[:10] if r.last_sold_date else 'Never sold' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No inventory items to show.</div>
+  {% endif %}
+</div>
+{% endblock %}

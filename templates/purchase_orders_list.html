@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Purchase Orders{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h2>Purchase Orders</h2><p>Orders placed with your suppliers.</p></div>
+  <a class="btn btn-primary" href="{{ url_for('purchase_orders_new') }}">+ New Purchase Order</a>
+</div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Status</label>
+    <select name="status">
+      <option value="">All</option>
+      <option value="pending" {{ 'selected' if status_filter=='pending' }}>Pending</option>
+      <option value="partial" {{ 'selected' if status_filter=='partial' }}>Partially Received</option>
+      <option value="received" {{ 'selected' if status_filter=='received' }}>Received</option>
+      <option value="cancelled" {{ 'selected' if status_filter=='cancelled' }}>Cancelled</option>
+    </select>
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+</form>
+
+<div class="card">
+  {% if orders %}
+  <table>
+    <tr><th>PO Number</th><th>Supplier</th><th>Order Date</th><th>Total Cost</th><th>Status</th><th></th></tr>
+    {% for o in orders %}
+    <tr>
+      <td class="mono">{{ o.po_number }}</td>
+      <td>{{ o.supplier_name }}</td>
+      <td>{{ o.order_date }}</td>
+      <td>₱{{ '%.2f'|format(o.total_cost) }}</td>
+      <td>
+        {% if o.status == 'pending' %}<span class="badge badge-user">Pending</span>
+        {% elif o.status == 'partial' %}<span class="badge" style="background:rgba(255,183,3,.15); color:var(--accent-2);">Partial</span>
+        {% elif o.status == 'received' %}<span class="badge" style="background:rgba(76,175,109,.15); color:var(--good);">Received</span>
+        {% else %}<span class="badge badge-inactive">Cancelled</span>{% endif %}
+      </td>
+      <td><a class="btn btn-sm" href="{{ url_for('purchase_orders_view', po_id=o.id) }}">View</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No purchase orders yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

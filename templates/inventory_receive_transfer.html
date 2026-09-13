@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Receive Transfer{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Receive Stock Transfer</h2><p>Upload a transfer file you received from another branch to add that stock to your local inventory.</p></div></div>
+
+<div class="card" style="max-width:480px;">
+  <form method="post" enctype="multipart/form-data">
+    <label>Transfer File (.json)</label>
+    <input type="file" name="transfer_file" accept=".json" required>
+    <button class="btn btn-primary" type="submit">Receive This Transfer</button>
+  </form>
+  <p style="color:var(--muted); font-size:13px; margin-top:14px;">
+    Each transfer file can only be received once — if you accidentally upload the same file twice,
+    it will be safely skipped instead of double-counting the stock.
+  </p>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Stock Movement{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Stock Movement</h2><p>Every stock change — restocks, sales, adjustments, purchases — with who did it. Showing the most recent 300.</p></div></div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Date</label>
+    <input type="date" name="date" value="{{ date_filter }}">
+  </div>
+  <div class="field">
+    <label>Reason</label>
+    <select name="reason">
+      <option value="">All</option>
+      {% for r in reasons %}
+      <option value="{{ r.reason }}" {{ 'selected' if reason_filter == r.reason }}>{{ r.reason|capitalize }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field" style="flex:1;">
+    <label>Item Name</label>
+    <input type="text" name="item" value="{{ item_filter }}" placeholder="Search item">
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn" href="{{ url_for('stock_movement_report') }}">Reset</a>
+</form>
+
+<div class="card">
+  {% if logs %}
+  <table>
+    <tr><th>Date</th><th>Item</th><th>Change</th><th>Reason</th><th>Note</th><th>By</th></tr>
+    {% for l in logs %}
+    <tr>
+      <td class="mono">{{ l.log_date[:16].replace('T',' ') }}</td>
+      <td>{{ l.item_name }} <span class="mono" style="color:var(--muted); font-size:11px;">{{ l.sku }}</span></td>
+      <td style="color: {{ 'var(--good)' if l.change_qty > 0 else 'var(--bad)' }}; font-weight:600;">{{ '%+d'|format(l.change_qty) }}</td>
+      <td><span class="badge badge-user">{{ l.reason|capitalize }}</span></td>
+      <td style="color:var(--muted);">{{ l.note or '—' }}</td>
+      <td>{{ l.by_user_name or 'Unknown' }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No stock movement matches this filter.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Best Sellers{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Best-Selling Products</h2><p>Top 20 items by quantity sold.</p></div></div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Specific Date</label>
+    <input type="date" name="date" value="{{ date_filter }}">
+  </div>
+  <div class="field">
+    <label>Month</label>
+    <input type="month" name="month" value="{{ month_filter }}">
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn" href="{{ url_for('best_sellers_report') }}">Reset (All Time)</a>
+</form>
+
+<div class="card">
+  {% if rows %}
+  <table>
+    <tr><th style="width:50px;">#</th><th>Item</th><th>Units Sold</th><th>Revenue</th><th># of Sales</th></tr>
+    {% for r in rows %}
+    <tr>
+      <td>{{ loop.index }}</td>
+      <td>{{ r.item_name }}</td>
+      <td><strong>{{ r.total_qty }}</strong></td>
+      <td>₱{{ '%.2f'|format(r.total_revenue) }}</td>
+      <td>{{ r.num_sales }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No sales in this period.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Log in{% endblock %}
+{% block guest_content %}
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="brand">
+      <img src="{{ url_for('static', filename='logo.png') }}" alt="DAN J MOTO" class="brand-logo">
+      <div>
+        <h1>DAN J MOTO</h1>
+        <span>Accessories POS</span>
+      </div>
+    </div>
+    <form method="post">
+      <label>Username</label>
+      <input type="text" name="username" required autofocus>
+      <label>Password</label>
+      <input type="password" name="password" required>
+      <button class="btn btn-primary" style="width:100%;" type="submit">Log In</button>
+    </form>
+    <p class="hint">Default admin login: <span class="mono">admin / admin123</span><br>Change the password after signing in.</p>
+  </div>
+</div>
+{% endblock %}

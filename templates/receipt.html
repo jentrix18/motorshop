@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Receipt {{ sale.receipt_no }}{% endblock %}
+{% block content %}
+<div class="no-print" style="margin-bottom:16px;">
+  <a class="btn" href="{{ url_for('sales_new') }}">← New Sale</a>
+  <a class="btn" href="{{ url_for('sales_history') }}">Purchase History</a>
+</div>
+
+<div class="receipt">
+  <h2>DAN J MOTO</h2>
+  <div class="shop-sub">Riding Bags · Safety Gears · Jackets · Accessories</div>
+  <hr>
+  <div class="row"><span>Receipt No.</span><span>{{ sale.receipt_no }}</span></div>
+  <div class="row"><span>Date</span><span>{{ sale.sale_datetime[:10] }}</span></div>
+  <div class="row"><span>Time</span><span>{{ sale.sale_datetime[11:16] }}</span></div>
+  <div class="row"><span>Cashier</span><span>{{ cashier_name }}</span></div>
+  <hr>
+  <div class="row"><span>Buyer</span><span>{{ sale.buyer_name }}</span></div>
+  {% if sale.buyer_contact %}<div class="row"><span>Contact</span><span>{{ sale.buyer_contact }}</span></div>{% endif %}
+  <div class="row"><span>Payment</span><span>{{ sale.payment_method }}</span></div>
+  <hr>
+  {% for it in items %}
+  <div class="row"><span>{{ it.item_name }} x{{ it.quantity }}</span><span>₱{{ '%.2f'|format(it.line_subtotal) }}</span></div>
+  {% endfor %}
+  <hr>
+  <div class="totals">
+    <div class="row"><span>Subtotal</span><span>₱{{ '%.2f'|format(sale.subtotal) }}</span></div>
+    {% if sale.discount_amount > 0 %}
+    <div class="row discount"><span>Discount</span><span>-₱{{ '%.2f'|format(sale.discount_amount) }}</span></div>
+    {% endif %}
+    <div class="row grand"><span>TOTAL</span><span>₱{{ '%.2f'|format(sale.total) }}</span></div>
+    {% if sale.cash_received is not none %}
+    <div class="row"><span>Cash Received</span><span>₱{{ '%.2f'|format(sale.cash_received) }}</span></div>
+    <div class="row"><span>Change</span><span>₱{{ '%.2f'|format(sale.change_amount) }}</span></div>
+    {% endif %}
+  </div>
+  <hr>
+  <div style="text-align:center; font-size:11px; color:#666;">Thank you for your purchase! Keep this receipt for warranty claims.</div>
+</div>
+
+<div class="receipt-actions no-print">
+  <button class="btn btn-primary" onclick="window.print()">🖨️ Print Receipt</button>
+</div>
+{% endblock %}

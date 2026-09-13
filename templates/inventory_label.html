@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Label — {{ item.item_name }}{% endblock %}
+{% block content %}
+<div class="no-print" style="margin-bottom:16px;">
+  <a class="btn" href="{{ url_for('inventory_list') }}">← Back to Stock List</a>
+  <span style="color:var(--muted); font-size:13px; margin-left:10px;">Preview below is shown at actual 5cm × 5cm print size.</span>
+</div>
+
+<div class="label-sticker">
+  <div class="label-header">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="DAN J MOTO" class="label-logo">
+    <span class="label-shopname">DAN J MOTO</span>
+  </div>
+
+  <div class="label-qr" id="qrcode"></div>
+
+  <div class="label-itemname">{{ item.item_name }}</div>
+  {% if item.size or item.version %}
+  <div class="label-variant">{{ item.size }}{{ ' · ' if item.size and item.version }}{{ item.version }}</div>
+  {% endif %}
+
+  <div class="label-footer">
+    <span class="label-sku">{{ item.sku }}</span>
+    <span class="label-price">₱{{ '%.0f'|format(item.selling_price) }}</span>
+  </div>
+</div>
+
+<div class="receipt-actions no-print">
+  <button class="btn btn-primary" onclick="window.print()">🖨️ Print Label (5×5cm)</button>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+  new QRCode(document.getElementById("qrcode"), {
+    text: {{ item.sku|tojson }},
+    width: 76,
+    height: 76,
+    correctLevel: QRCode.CorrectLevel.M
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Audit Log{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Audit Log</h2><p>A record of who did what, for accountability. Showing the most recent 300 entries.</p></div></div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Action Type</label>
+    <select name="action">
+      <option value="">All actions</option>
+      {% for a in action_types %}
+      <option value="{{ a.action }}" {{ 'selected' if action_filter == a.action }}>{{ a.action }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="field">
+    <label>User</label>
+    <input type="text" name="user" value="{{ user_filter }}" placeholder="Search by name">
+  </div>
+  <div class="field">
+    <label>Date</label>
+    <input type="date" name="date" value="{{ date_filter }}">
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn" href="{{ url_for('audit_log_view') }}">Reset</a>
+</form>
+
+<div class="card">
+  {% if logs %}
+  <table>
+    <tr><th style="width:150px;">When</th><th style="width:150px;">User</th><th style="width:140px;">Action</th><th>Details</th></tr>
+    {% for l in logs %}
+    <tr>
+      <td class="mono">{{ l.created_at[:16].replace('T',' ') }}</td>
+      <td>{{ l.performed_by_name }}</td>
+      <td><span class="badge badge-admin">{{ l.action }}</span></td>
+      <td>{{ l.details }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No activity recorded yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

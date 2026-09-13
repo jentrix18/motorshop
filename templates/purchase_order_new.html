@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}New Purchase Order{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>New Purchase Order</h2><p>Order stock from a supplier. Receiving the stock later will add it to inventory automatically.</p></div></div>
+
+<form method="post">
+  <div class="card" style="margin-bottom:16px;">
+    <div class="form-row">
+      <div>
+        <label>Supplier</label>
+        <select name="supplier_id" required>
+          {% for s in suppliers %}
+          <option value="{{ s.id }}">{{ s.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Notes (optional)</label>
+        <input type="text" name="notes" placeholder="e.g. Rush order, delivery expected next week">
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Items to Order</h3>
+    {% if items %}
+    <table id="poTable">
+      <tr><th>Item</th><th style="width:120px;">Qty</th><th style="width:140px;">Unit Cost (₱)</th><th style="width:120px;">Line Total</th><th></th></tr>
+    </table>
+    <button type="button" class="btn btn-sm" onclick="addRow()">+ Add Item</button>
+    <div style="text-align:right; margin-top:14px; font-size:18px;"><strong>Order Total: <span id="poTotal">₱0.00</span></strong></div>
+    <button class="btn btn-primary" type="submit" style="margin-top:14px;">Create Purchase Order</button>
+    {% else %}
+    <div class="empty">No inventory items exist yet. Add items to your Stock List first, then come back here.</div>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+const ITEMS = [
+  {% for i in items %}
+  {id: {{ i.id }}, name: {{ i.item_name|tojson }}, cost: {{ i.cost_price }}},
+  {% endfor %}
+];
+
+function addRow() {
+  const table = document.getElementById('poTable');
+  const tr = document.createElement('tr');
+  const options = ITEMS.map(it => `<option value="${it.id}" data-cost="${it.cost}">${it.name}</option>`).join('');
+  tr.innerHTML = `
+    <td><select name="item_id[]" onchange="fillCost(this); recalc();" style="margin-bottom:0;">${options}</select></td>
+    <td><input type="number" name="quantity[]" min="1" value="1" onchange="recalc()" style="margin-bottom:0;"></td>
+    <td><input type="number" name="unit_cost[]" step="0.01" min="0" value="0" onchange="recalc()" style="margin-bottom:0;"></td>
+    <td class="lineTotal mono">₱0.00</td>
+    <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); recalc();">✕</button></td>
+  `;
+  table.appendChild(tr);
+  fillCost(tr.querySelector('select'));
+  recalc();
+}
+
+function fillCost(select) {
+  const cost = select.selectedOptions[0].dataset.cost;
+  select.closest('tr').querySelector('input[name="unit_cost[]"]').value = cost;
+}
+
+function recalc() {
+  let total = 0;
+  document.querySelectorAll('#poTable tr').forEach((tr, idx) => {
+    if (idx === 0) return;
+    const qty = parseFloat(tr.querySelector('input[name="quantity[]"]').value || 0);
+    const cost = parseFloat(tr.querySelector('input[name="unit_cost[]"]').value || 0);
+    const lineTotal = qty * cost;
+    tr.querySelector('.lineTotal').textContent = '₱' + lineTotal.toFixed(2);
+    total += lineTotal;
+  });
+  document.getElementById('poTotal').textContent = '₱' + total.toFixed(2);
+}
+
+if (ITEMS.length) addRow();
+</script>
+{% endblock %}

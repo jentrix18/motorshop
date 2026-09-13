@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+{% block title %}New Sale{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>New Sale</h2><p>Select items, set quantity, and apply a buyer discount if applicable.</p></div></div>
+
+<form method="post" id="saleForm">
+  <div class="grid grid-2">
+    <div class="card">
+      <h3>Buyer Details</h3>
+      <div class="form-row">
+        <div>
+          <label>Buyer Name</label>
+          <input type="text" name="buyer_name" placeholder="Walk-in Customer">
+        </div>
+        <div>
+          <label>Contact Number</label>
+          <input type="text" name="buyer_contact">
+        </div>
+      </div>
+      <div class="form-row">
+        <div>
+          <label>Payment Method</label>
+          <select name="payment_method">
+            <option>Cash</option>
+            <option>GCash</option>
+            <option>Card</option>
+            <option>Bank Transfer</option>
+          </select>
+        </div>
+        <div>
+          <label>Buyer Discount (₱ Amount)</label>
+          <input type="number" step="0.01" min="0" name="discount_amount" id="discount" value="0" oninput="recalc()">
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Order Summary</h3>
+      <div class="row" style="display:flex; justify-content:space-between;"><span>Subtotal</span><strong id="sumSubtotal">₱0.00</strong></div>
+      <div class="row" style="display:flex; justify-content:space-between;"><span>Discount</span><strong id="sumDiscount">-₱0.00</strong></div>
+      <div class="row" style="display:flex; justify-content:space-between; font-size:20px; margin-top:8px; border-top:1px solid var(--border); padding-top:8px;"><span>Total</span><strong id="sumTotal">₱0.00</strong></div>
+
+      <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--border);">
+        <label>Cash Received (₱)</label>
+        <input type="number" step="0.01" min="0" name="cash_received" id="cashReceived" placeholder="Optional — leave blank for exact/non-cash" oninput="recalc()">
+        <div class="row" style="display:flex; justify-content:space-between; font-size:18px;"><span>Change</span><strong id="sumChange">₱0.00</strong></div>
+      </div>
+
+      <button class="btn btn-primary" type="submit" style="width:100%; margin-top:14px;">Complete Sale &amp; Print Receipt</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <h3>Items</h3>
+    <div id="scanBox" style="display:none; max-width:320px; margin-bottom:14px;">
+      <div id="qrReader"></div>
+      <button type="button" class="btn btn-sm btn-danger" style="margin-top:8px;" onclick="stopScanner()">✕ Close Scanner</button>
+    </div>
+    <div style="display:flex; gap:8px; align-items:flex-end; max-width:420px; margin-bottom:14px;">
+      <div style="flex:1;">
+        <label>Or type/paste item code</label>
+        <input type="text" id="manualCode" placeholder="e.g. SKU-00001" style="margin-bottom:0;" onkeydown="if(event.key==='Enter'){event.preventDefault(); addByCode();}">
+      </div>
+      <button type="button" class="btn btn-sm" onclick="addByCode()">Add</button>
+    </div>
+    <table id="cartTable">
+      <tr><th>Item</th><th style="width:110px;">Qty</th><th style="width:110px;">Price</th><th style="width:110px;">Line Total</th><th></th></tr>
+    </table>
+    <button type="button" class="btn btn-sm" onclick="addRow()">+ Add Item</button>
+    <button type="button" class="btn btn-sm btn-primary" onclick="startScanner()">📷 Scan Item</button>
+  </div>
+</form>
+
+<script>
+const ITEMS = [
+  {% for i in items %}
+  {id: {{ i.id }}, sku: {{ i.sku|tojson }}, barcode: {{ (i.barcode or '')|tojson }},
+   name: {{ (i.item_name + (' — ' + i.size if i.size else '') + (' (' + i.version + ')' if i.version else ''))|tojson }},
+   price: {{ i.selling_price }}, stock: {{ i.quantity }}},
+  {% endfor %}
+];
+
+function addRow() {
+  const table = document.getElementById('cartTable');
+  const tr = document.createElement('tr');
+  const options = ITEMS.map(it => `<option value="${it.id}" data-price="${it.price}" data-stock="${it.stock}">${it.name} (${it.stock} in stock)</option>`).join('');
+  tr.innerHTML = `
+    <td><select name="item_id[]" onchange="recalc()" style="margin-bottom:0;">${options}</select></td>
+    <td><input type="number" name="quantity[]" min="1" value="1" onchange="recalc()" style="margin-bottom:0;"></td>
+    <td class="price mono">₱0.00</td>
+    <td class="lineTotal mono">₱0.00</td>
+    <td><button type="button" class="btn btn-sm btn-danger" onclick="this.closest('tr').remove(); recalc();">✕</button></td>
+  `;
+  table.appendChild(tr);
+  recalc();
+}
+
+function recalc() {
+  let subtotal = 0;
+  document.querySelectorAll('#cartTable tr').forEach((tr, idx) => {
+    if (idx === 0) return;
+    const select = tr.querySelector('select');
+    const qtyInput = tr.querySelector('input[type=number]');
+    if (!select) return;
+    const price = parseFloat(select.selectedOptions[0].dataset.price || 0);
+    const qty = parseInt(qtyInput.value || 0);
+    const lineTotal = price * qty;
+    tr.querySelector('.price').textContent = '₱' + price.toFixed(2);
+    tr.querySelector('.lineTotal').textContent = '₱' + lineTotal.toFixed(2);
+    subtotal += lineTotal;
+  });
+  let discountAmt = parseFloat(document.getElementById('discount').value || 0);
+  if (discountAmt > subtotal) discountAmt = subtotal;
+  const total = Math.max(subtotal - discountAmt, 0);
+  document.getElementById('sumSubtotal').textContent = '₱' + subtotal.toFixed(2);
+  document.getElementById('sumDiscount').textContent = '-₱' + discountAmt.toFixed(2);
+  document.getElementById('sumTotal').textContent = '₱' + total.toFixed(2);
+
+  const cashReceived = parseFloat(document.getElementById('cashReceived').value || 0);
+  const changeEl = document.getElementById('sumChange');
+  if (document.getElementById('cashReceived').value.trim() === '') {
+    changeEl.textContent = '₱0.00';
+    changeEl.style.color = '';
+  } else {
+    const change = cashReceived - total;
+    changeEl.textContent = '₱' + change.toFixed(2);
+    changeEl.style.color = change < 0 ? 'var(--bad)' : 'var(--good)';
+  }
+}
+
+if (ITEMS.length) { addRow(); } else {
+  document.getElementById('cartTable').insertAdjacentHTML('beforeend', '<tr><td colspan="5">No items in stock. Add inventory first.</td></tr>');
+}
+
+// --- Camera QR scanner ---
+let html5QrcodeScanner = null;
+
+function startScanner() {
+  document.getElementById('scanBox').style.display = 'block';
+  html5QrcodeScanner = new Html5Qrcode("qrReader");
+  html5QrcodeScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 220 },
+    onScanSuccess,
+    () => {}
+  ).catch(err => {
+    alert("Could not access the camera. Please allow camera permission and try again.");
+    document.getElementById('scanBox').style.display = 'none';
+  });
+}
+
+function stopScanner() {
+  if (html5QrcodeScanner) {
+    html5QrcodeScanner.stop().then(() => {
+      html5QrcodeScanner.clear();
+      html5QrcodeScanner = null;
+    }).catch(() => {});
+  }
+  document.getElementById('scanBox').style.display = 'none';
+}
+
+function onScanSuccess(decodedText) {
+  addItemBySku(decodedText);
+  stopScanner();
+}
+
+function addByCode() {
+  const input = document.getElementById('manualCode');
+  const code = input.value.trim();
+  if (!code) return;
+  addItemBySku(code);
+  input.value = '';
+  input.focus();
+}
+
+function addItemBySku(code) {
+  const trimmed = code.trim();
+  const item = ITEMS.find(it => it.sku === trimmed || it.barcode === trimmed);
+  if (!item) {
+    alert("No matching item found for code: " + code);
+    return;
+  }
+
+  const rows = document.querySelectorAll('#cartTable tr');
+  let matched = false;
+  rows.forEach((tr, idx) => {
+    if (idx === 0) return;
+    const select = tr.querySelector('select');
+    if (select && parseInt(select.value) === item.id) {
+      const qtyInput = tr.querySelector('input[type=number]');
+      qtyInput.value = parseInt(qtyInput.value || 0) + 1;
+      matched = true;
+    }
+  });
+
+  if (!matched) {
+    addRow();
+    const newRow = document.querySelector('#cartTable tr:last-child');
+    newRow.querySelector('select').value = item.id;
+  }
+
+  recalc();
+}
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+{% endblock %}

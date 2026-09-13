@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}New Supplier{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>New Supplier</h2></div></div>
+
+<div class="card" style="max-width:520px;">
+  <form method="post">
+    <label>Supplier Name</label>
+    <input type="text" name="name" required placeholder="e.g. MT Helmets Philippines">
+
+    <div class="form-row">
+      <div>
+        <label>Contact Person</label>
+        <input type="text" name="contact_person">
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="text" name="phone">
+      </div>
+    </div>
+
+    <label>Email</label>
+    <input type="email" name="email">
+
+    <label>Address</label>
+    <input type="text" name="address">
+
+    <label>Notes</label>
+    <textarea name="notes" rows="3"></textarea>
+
+    <button class="btn btn-primary" type="submit">Save Supplier</button>
+    <a class="btn" href="{{ url_for('suppliers_list') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Import Branch Sales{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Import Branch Sales</h2><p>Upload a sales export file from a branch to add it to your combined records.</p></div></div>
+
+<div class="card" style="max-width:480px;">
+  <form method="post" enctype="multipart/form-data">
+    <label>Sales Export File (.json)</label>
+    <input type="file" name="sales_file" accept=".json" required>
+    <button class="btn btn-primary" type="submit">Import These Sales</button>
+  </form>
+  <p style="color:var(--muted); font-size:13px; margin-top:14px;">
+    This only adds the sales to your history for combined reporting — it does not affect
+    your own local inventory quantities, since the stock reduction already happened at the branch.
+    Importing the same file twice is safe; already-imported sales are automatically skipped.
+  </p>
+</div>
+{% endblock %}

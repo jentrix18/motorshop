@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}Edit Item{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Edit Item</h2><p class="mono">{{ item.sku }}</p></div></div>
+
+<div class="card" style="max-width:640px;">
+  <form method="post">
+    <div class="form-row">
+      <div>
+        <label>Item Name</label>
+        <input type="text" name="item_name" value="{{ item.item_name }}" required>
+      </div>
+      <div>
+        <label>Brand</label>
+        <input type="text" name="brand" value="{{ item.brand or '' }}">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Category</label>
+        <input type="text" name="category" value="{{ item.category }}">
+      </div>
+      <div>
+        <label>Low Stock Alert Threshold</label>
+        <input type="number" min="0" name="low_stock_threshold" value="{{ item.low_stock_threshold }}">
+      </div>
+    </div>
+
+    <label>Manufacturer Barcode (optional)</label>
+    <input type="text" name="barcode" value="{{ item.barcode or '' }}" placeholder="Scan or type the barcode from the box">
+
+    <div class="form-row">
+      <div>
+        <label>Size (optional)</label>
+        <input type="text" name="size" value="{{ item.size or '' }}" placeholder="e.g. S, M, L, XL, XXL">
+      </div>
+      <div>
+        <label>Version / Colorway (optional)</label>
+        <input type="text" name="version" value="{{ item.version or '' }}" placeholder="e.g. Gloss Fluor Yellow">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Cost Price (₱)</label>
+        <input type="number" step="0.01" min="0" name="cost_price" value="{{ item.cost_price }}" required>
+      </div>
+      <div>
+        <label>Selling Price (₱)</label>
+        <input type="number" step="0.01" min="0" name="selling_price" value="{{ item.selling_price }}" required>
+      </div>
+    </div>
+
+    <label>Current Quantity: <strong>{{ item.quantity }} {{ item.unit }}</strong></label>
+    <label>Adjust Quantity (use a negative number to reduce, e.g. -2 for damaged stock)</label>
+    <input type="number" name="adjust_qty" value="0">
+
+    <button class="btn btn-primary" type="submit">Save Changes</button>
+    <a class="btn" href="{{ url_for('inventory_list') }}">Cancel</a>
+  </form>
+</div>
+{% endblock %}

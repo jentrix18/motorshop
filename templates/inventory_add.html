@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}Add Stock{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Add Stock</h2><p>Scan the product's barcode to auto-fill an existing item, or leave it blank and fill in the details for a brand-new item. If the item (same name &amp; brand) already exists, the quantity you enter is added to its current stock.</p></div></div>
+
+<div class="card" style="max-width:640px;">
+  <div style="margin-bottom:18px; padding-bottom:18px; border-bottom:1px solid var(--border);">
+    <label>Scan or Type the Product's Barcode (optional)</label>
+    <input type="text" id="barcodeScan" placeholder="Scan the barcode on the box, or type it"
+           style="margin-bottom:6px;"
+           onkeydown="if(event.key==='Enter'){event.preventDefault(); checkBarcode();}">
+    <div id="barcodeStatus" style="font-size:13px; color:var(--muted); min-height:18px;"></div>
+  </div>
+
+  <form method="post" id="addStockForm">
+    <input type="hidden" name="barcode" id="barcodeField">
+    <div class="form-row">
+      <div>
+        <label>Item Name</label>
+        <input type="text" name="item_name" id="f_item_name" required placeholder="e.g. Motorcycle Side Mirror">
+      </div>
+      <div>
+        <label>Brand</label>
+        <input type="text" name="brand" id="f_brand" placeholder="e.g. Rizoma">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Category</label>
+        <input type="text" name="category" id="f_category" placeholder="e.g. Mirrors, Helmets, Oils">
+      </div>
+      <div>
+        <label>Unit</label>
+        <input type="text" name="unit" id="f_unit" value="pcs">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Size (optional)</label>
+        <input type="text" name="size" id="f_size" placeholder="e.g. S, M, L, XL, XXL">
+      </div>
+      <div>
+        <label>Version / Colorway (optional)</label>
+        <input type="text" name="version" id="f_version" placeholder="e.g. Gloss Fluor Yellow, Matte Black">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Cost Price (₱)</label>
+        <input type="number" step="0.01" min="0" name="cost_price" id="f_cost_price" required>
+      </div>
+      <div>
+        <label>Selling Price (₱)</label>
+        <input type="number" step="0.01" min="0" name="selling_price" id="f_selling_price" required>
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div>
+        <label>Quantity to Add</label>
+        <input type="number" min="1" name="quantity" id="f_quantity" required>
+      </div>
+      <div>
+        <label>Low Stock Alert Threshold</label>
+        <input type="number" min="0" name="low_stock_threshold" id="f_low_stock_threshold" value="5">
+      </div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Save to Inventory</button>
+    <a class="btn" href="{{ url_for('inventory_list') }}">Cancel</a>
+  </form>
+</div>
+
+<script>
+async function checkBarcode() {
+  const code = document.getElementById('barcodeScan').value.trim();
+  const statusEl = document.getElementById('barcodeStatus');
+  document.getElementById('barcodeField').value = code;
+
+  if (!code) {
+    statusEl.textContent = '';
+    return;
+  }
+
+  statusEl.textContent = 'Checking...';
+  try {
+    const res = await fetch(`/api/lookup-barcode/${encodeURIComponent(code)}`);
+    const data = await res.json();
+    if (data.found) {
+      statusEl.innerHTML = `✅ Found existing item: <strong>${data.item_name}</strong> — current stock: ${data.quantity} ${data.unit}. Enter the quantity you're adding below.`;
+      document.getElementById('f_item_name').value = data.item_name;
+      document.getElementById('f_category').value = data.category;
+      document.getElementById('f_brand').value = data.brand || '';
+      document.getElementById('f_cost_price').value = data.cost_price;
+      document.getElementById('f_selling_price').value = data.selling_price;
+      document.getElementById('f_unit').value = data.unit;
+      document.getElementById('f_size').value = data.size || '';
+      document.getElementById('f_version').value = data.version || '';
+    } else {
+      statusEl.innerHTML = `🆕 New item — this barcode isn't in the system yet. Fill in the details below to create it.`;
+      document.getElementById('f_item_name').value = '';
+      document.getElementById('f_category').value = '';
+      document.getElementById('f_brand').value = '';
+      document.getElementById('f_cost_price').value = '';
+      document.getElementById('f_selling_price').value = '';
+      document.getElementById('f_size').value = '';
+      document.getElementById('f_version').value = '';
+    }
+    document.getElementById('f_quantity').focus();
+  } catch (e) {
+    statusEl.textContent = 'Could not check barcode — you can still fill the form manually.';
+  }
+}
+
+document.getElementById('barcodeScan').addEventListener('blur', checkBarcode);
+</script>
+{% endblock %}

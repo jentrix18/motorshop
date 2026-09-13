@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Inventory{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h2>Stock List</h2><p>All motor accessories currently in inventory.</p></div>
+  <div style="display:flex; gap:8px;">
+    <a class="btn" href="{{ url_for('inventory_export_excel', q=q) }}">⬇ Export Excel</a>
+    <a class="btn" href="{{ url_for('inventory_export_pdf', q=q) }}">⬇ Export PDF</a>
+    <a class="btn btn-primary" href="{{ url_for('inventory_add') }}">+ Add Stock</a>
+  </div>
+</div>
+
+<form method="get" class="filters">
+  <div class="field" style="flex:1;">
+    <label>Search</label>
+    <input type="text" name="q" value="{{ q }}" placeholder="Search by name, SKU, or category">
+  </div>
+  <button class="btn" type="submit">Search</button>
+</form>
+
+<div class="card">
+  {% if items %}
+  <table>
+    <tr><th>SKU</th><th>Item</th><th>Size</th><th>Version</th><th>Category</th><th>Brand</th><th>Cost</th><th>Selling Price</th><th>Qty</th><th></th></tr>
+    {% for i in items %}
+    <tr>
+      <td class="mono">{{ i.sku }}</td>
+      <td>{{ i.item_name }}</td>
+      <td>{{ i.size or '—' }}</td>
+      <td>{{ i.version or '—' }}</td>
+      <td>{{ i.category }}</td>
+      <td>{{ i.brand or '—' }}</td>
+      <td>₱{{ '%.2f'|format(i.cost_price) }}</td>
+      <td>₱{{ '%.2f'|format(i.selling_price) }}</td>
+      <td class="{{ 'low-stock' if i.quantity <= i.low_stock_threshold }}">{{ i.quantity }} {{ i.unit }}</td>
+      <td>
+        <a class="btn btn-sm" href="{{ url_for('inventory_edit', item_id=i.id) }}">Edit</a>
+        <a class="btn btn-sm" href="{{ url_for('inventory_label', item_id=i.id) }}">QR Label</a>
+        <form method="post" action="{{ url_for('inventory_delete', item_id=i.id) }}" style="display:inline;"
+              data-item-name="{{ i.item_name }}" onsubmit="return confirmDeleteItem(this)">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <div class="empty">No items found. Add your first item to get started.</div>
+  {% endif %}
+</div>
+
+<script>
+function confirmDeleteItem(form) {
+  const name = form.dataset.itemName;
+  return confirm(`Delete "${name}"? It will be hidden from the stock list and sales screen. Past sales/receipts stay intact for your records.`);
+}
+</script>
+{% endblock %}

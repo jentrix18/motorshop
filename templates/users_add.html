@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}New Account{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>New Account</h2><p>Create another admin or a restricted user account.</p></div></div>
+
+<div class="card" style="max-width:520px;">
+  <form method="post">
+    <div class="form-row">
+      <div>
+        <label>Full Name</label>
+        <input type="text" name="full_name" required>
+      </div>
+      <div>
+        <label>Username</label>
+        <input type="text" name="username" required>
+      </div>
+    </div>
+    <label>Temporary Password</label>
+    <input type="password" name="password" required>
+
+    <label>Role</label>
+    <select name="role" id="role" onchange="toggleAdmin()">
+      <option value="user">User (restricted)</option>
+      <option value="admin">Admin (full access)</option>
+    </select>
+
+    <div id="permBlock">
+      <label>Access Permissions</label>
+      <div class="checkline"><input type="checkbox" name="can_manage_inventory" id="p1" checked><label for="p1">Manage Inventory (add / edit stock)</label></div>
+      <div class="checkline"><input type="checkbox" name="can_manage_sales" id="p2" checked><label for="p2">Process Sales (point of sale)</label></div>
+      <div class="checkline"><input type="checkbox" name="can_view_reports" id="p3" checked><label for="p3">View Purchase History / Reports</label></div>
+      <div class="checkline"><input type="checkbox" name="can_manage_purchasing" id="p4" checked><label for="p4">Manage Suppliers &amp; Purchase Orders</label></div>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Create Account</button>
+    <a class="btn" href="{{ url_for('users_list') }}">Cancel</a>
+  </form>
+</div>
+
+<script>
+function toggleAdmin() {
+  const isAdmin = document.getElementById('role').value === 'admin';
+  document.getElementById('permBlock').style.display = isAdmin ? 'none' : 'block';
+}
+</script>
+{% endblock %}

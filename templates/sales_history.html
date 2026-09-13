@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Sales History{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Sales History</h2><p>Filter sales by exact date, by month, or by buyer name.</p></div></div>
+
+<form method="get" class="filters">
+  <div class="field">
+    <label>Specific Date</label>
+    <input type="date" name="date" value="{{ date_filter }}">
+  </div>
+  <div class="field">
+    <label>Month</label>
+    <input type="month" name="month" value="{{ month_filter }}">
+  </div>
+  <div class="field" style="flex:1;">
+    <label>Buyer Name</label>
+    <input type="text" name="buyer" value="{{ buyer_filter }}" placeholder="Search buyer">
+  </div>
+  <button class="btn btn-primary" type="submit">Filter</button>
+  <a class="btn" href="{{ url_for('sales_history') }}">Reset</a>
+</form>
+
+<div class="card">
+  {% if sales %}
+  <table>
+    <tr><th>Receipt</th><th>Date</th><th>Buyer</th><th>Subtotal</th><th>Discount</th><th>Total</th><th></th></tr>
+    {% for s in sales %}
+    <tr>
+      <td class="mono">{{ s.receipt_no }}</td>
+      <td>{{ s.sale_date }}</td>
+      <td>{{ s.buyer_name }}</td>
+      <td>₱{{ '%.2f'|format(s.subtotal) }}</td>
+      <td>₱{{ '%.2f'|format(s.discount_amount) }}</td>
+      <td>₱{{ '%.2f'|format(s.total) }}</td>
+      <td><a class="btn btn-sm" href="{{ url_for('sales_receipt', sale_id=s.id) }}">View / Print</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+  <div style="text-align:right; margin-top:12px; font-size:16px;">
+    <strong>Total for selected range: ₱{{ '%.2f'|format(total_sum) }}</strong>
+  </div>
+  {% else %}
+  <div class="empty">No sales match this filter.</div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div><h2>Dashboard</h2><p>Shop performance at a glance.</p></div>
+</div>
+
+<div class="grid grid-4" style="margin-bottom:24px;">
+  <div class="stat">
+    <div class="label">Items in Inventory</div>
+    <div class="value">{{ total_items }}</div>
+  </div>
+  <div class="stat" style="border-left-color: {{ '#e5484d' if low_stock else '#ff6a2b' }};">
+    <div class="label">Low Stock Alerts</div>
+    <div class="value">{{ low_stock }}</div>
+  </div>
+  <div class="stat">
+    <div class="label">Sales Today</div>
+    <div class="value">₱{{ '%.2f'|format(sales_today.t) }}</div>
+    <div class="sub">{{ sales_today.c }} receipt(s)</div>
+  </div>
+  <div class="stat">
+    <div class="label">Sales This Month</div>
+    <div class="value">₱{{ '%.2f'|format(sales_month.t) }}</div>
+    <div class="sub">{{ sales_month.c }} receipt(s)</div>
+  </div>
+</div>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>Recent Sales</h3>
+    {% if recent_sales %}
+    <table>
+      <tr><th>Receipt</th><th>Buyer</th><th>Date</th><th>Total</th></tr>
+      {% for s in recent_sales %}
+      <tr>
+        <td><a href="{{ url_for('sales_receipt', sale_id=s.id) }}" class="mono">{{ s.receipt_no }}</a></td>
+        <td>{{ s.buyer_name }}</td>
+        <td>{{ s.sale_date }}</td>
+        <td>₱{{ '%.2f'|format(s.total) }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty">No sales recorded yet.</div>
+    {% endif %}
+  </div>
+
+  <div class="card">
+    <h3>Low Stock Items</h3>
+    {% if low_items %}
+    <table>
+      <tr><th>Item</th><th>Qty Left</th><th>Threshold</th></tr>
+      {% for i in low_items %}
+      <tr>
+        <td>{{ i.item_name }}</td>
+        <td class="low-stock">{{ i.quantity }} {{ i.unit }}</td>
+        <td>{{ i.low_stock_threshold }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+    {% else %}
+    <div class="empty">Stock levels look healthy.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

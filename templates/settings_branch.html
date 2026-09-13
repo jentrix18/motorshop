@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Branch Settings{% endblock %}
+{% block content %}
+<div class="topbar"><div><h2>Branch Settings</h2><p>Label this specific install so transfer/sales files are tagged correctly.</p></div></div>
+
+<div class="card" style="max-width:480px;">
+  <form method="post">
+    <label>This Install's Branch Name</label>
+    <input type="text" name="branch_name" value="{{ current_branch }}" required placeholder="e.g. Main, San Pedro, Cabuyao, Los Baños">
+    <button class="btn btn-primary" type="submit">Save</button>
+  </form>
+  <p style="color:var(--muted); font-size:13px; margin-top:14px;">
+    Each shop location should run its own separate copy of this app with its own unique branch name.
+    This name appears on exported transfer files and sales exports so Main can tell which shop they came from.
+  </p>
+</div>
+{% endblock %}
