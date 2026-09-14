@@ -8,8 +8,19 @@
 </head>
 <body>
 {% if current_user %}
+<div class="mobile-topbar">
+  <div class="brand">
+    <img src="{{ url_for('static', filename='logo.png') }}" alt="DAN J MOTO" class="brand-logo">
+    <div>
+      <h1 style="margin:0;">DAN J MOTO</h1>
+    </div>
+  </div>
+  <button class="hamburger-btn" onclick="toggleMobileNav()" aria-label="Menu">☰</button>
+</div>
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleMobileNav()"></div>
+
 <div class="shell">
-  <aside class="sidebar" style="display:flex; flex-direction:column;">
+  <aside class="sidebar" id="sidebar" style="display:flex; flex-direction:column;">
     <div class="brand">
       <img src="{{ url_for('static', filename='logo.png') }}" alt="DAN J MOTO" class="brand-logo">
       <div>
@@ -92,6 +103,22 @@
     {% block content %}{% endblock %}
   </main>
 </div>
+
+<script>
+function toggleMobileNav() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebarBackdrop').classList.toggle('open');
+}
+// Auto-close the menu after tapping a nav link, so it doesn't stay open
+// covering the page you just navigated to.
+document.addEventListener('DOMContentLoaded', function () {
+  document.querySelectorAll('#sidebar a.nav-link').forEach(function (link) {
+    link.addEventListener('click', function () {
+      if (window.innerWidth <= 860) toggleMobileNav();
+    });
+  });
+});
+</script>
 {% else %}
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}

@@ -210,6 +210,73 @@ input:focus, select:focus, textarea:focus { outline: 2px solid var(--accent); bo
 .filters label { margin-bottom: 4px; }
 .filters input { margin-bottom: 0; }
 
+/* ---------- Mobile navigation ---------- */
+.mobile-topbar { display: none; }
+.sidebar-backdrop { display: none; }
+
+@media (max-width: 860px) {
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 14px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .mobile-topbar .brand { border: none; padding: 0; margin: 0; }
+  .mobile-topbar .brand h1 { font-size: 17px; }
+  .mobile-topbar .brand-logo { width: 32px; height: 32px; }
+  .mobile-topbar .hamburger-btn {
+    background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+    font-size: 20px; line-height: 1; cursor: pointer; padding: 8px 12px; border-radius: 6px;
+  }
+
+  .shell { flex-direction: column; }
+
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    width: 260px;
+    max-width: 80vw;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease;
+    z-index: 250;
+    box-shadow: 6px 0 24px rgba(0,0,0,.5);
+    overflow-y: auto;
+  }
+  .sidebar.open { transform: translateX(0); }
+
+  .sidebar-backdrop.open {
+    display: block;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,.55);
+    z-index: 200;
+  }
+
+  .main { padding: 16px; width: 100%; box-sizing: border-box; }
+
+  .grid-4, .grid-2 { grid-template-columns: 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+
+  .topbar { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .topbar h2 { font-size: 20px; }
+
+  .stat .value { font-size: 26px; }
+
+  /* Let wide tables scroll horizontally instead of squeezing/overflowing the page */
+  table { display: block; overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
+
+  .login-card { width: 90vw; max-width: 360px; padding: 22px; }
+  .receipt { width: 90vw; max-width: 340px; }
+
+  .filters { flex-direction: column; align-items: stretch; }
+  .filters .field { min-width: 0; }
+}
+
 /* ---------- 5x5cm QR sticker label ---------- */
 .label-sticker {
   width: 5cm; height: 5cm;
